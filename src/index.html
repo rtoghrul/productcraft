@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProductCraft — Digital Product Generator for Etsy &amp; Gumroad</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#f9f7f3;--surface:#fff;--surface2:#f3f0e9;--border:#e6e0d5;--text:#1a1712;--text-dim:#6b6354;--accent:#e05a2c;--accent2:#2563eb;--green:#059669;--green-bg:#ecfdf5;--radius:12px;--radius-sm:8px;--font-display:'Instrument Serif',Georgia,serif;--font-body:'Instrument Sans',system-ui,sans-serif;--font-mono:'DM Mono',monospace}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+header{padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
+.logo{font-family:var(--font-display);font-size:1.3rem}
+.logo span{color:var(--accent)}
+nav{display:flex;gap:1rem;flex-wrap:wrap}
+nav a{color:var(--text-dim);text-decoration:none;font-size:0.85rem;font-weight:500}
+nav a:hover{color:var(--accent)}
+.container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+
+.hero{text-align:center;margin-bottom:2.5rem}
+.hero h1{font-family:var(--font-display);font-size:clamp(2rem,4vw,2.8rem);line-height:1.15;margin-bottom:0.5rem}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero p{color:var(--text-dim);font-size:1.05rem;max-width:520px;margin:0 auto}
+
+/* Tabs */
+.tabs{display:flex;gap:0;margin-bottom:1.5rem;border-radius:var(--radius-sm);overflow:hidden;border:1px solid var(--border)}
+.tab{flex:1;padding:0.7rem 0.5rem;background:transparent;border:none;border-right:1px solid var(--border);font-family:var(--font-body);font-size:0.82rem;font-weight:600;color:var(--text-dim);cursor:pointer;transition:all .2s;text-align:center}
+.tab:last-child{border-right:none}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--accent);color:#fff}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.5rem}
+.card h2{font-family:var(--font-display);font-size:1.25rem;margin-bottom:0.3rem}
+.card .sub{color:var(--text-dim);font-size:0.85rem;margin-bottom:1.25rem}
+
+/* Forms */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem}
+.field{margin-bottom:0.85rem}
+.field label{display:block;font-size:0.78rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:0.3rem}
+.field input,.field textarea,.field select{width:100%;padding:0.6rem 0.8rem;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:0.88rem;color:var(--text);outline:none;resize:vertical}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent2)}
+.field textarea{min-height:90px;font-size:0.82rem}
+
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.7rem 1.5rem;border-radius:100px;font-size:0.9rem;font-weight:600;font-family:var(--font-body);border:none;cursor:pointer;transition:transform .15s,box-shadow .15s;text-decoration:none}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(224,90,44,.2)}
+.btn-blue{background:var(--accent2);color:#fff}
+.btn-blue:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(37,99,235,.2)}
+.btn-outline{background:var(--surface);color:var(--text);border:2px solid var(--border)}
+.btn-outline:hover{border-color:var(--accent)}
+
+/* Preview */
+.preview-area{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-top:1rem;min-height:100px;max-height:500px;overflow-y:auto;white-space:pre-wrap;font-family:var(--font-mono);font-size:0.78rem;line-height:1.6}
+.preview-area:empty::after{content:'Generated product will appear here...';color:var(--text-dim);font-style:italic}
+.preview-area.rendered{font-family:var(--font-body);font-size:0.9rem;white-space:normal}
+
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:0.6rem 1.4rem;border-radius:100px;font-weight:600;font-size:0.85rem;opacity:0;pointer-events:none;transition:opacity .3s;z-index:1000}
+.toast.show{opacity:1}
+
+.guide-section h3{font-family:var(--font-display);font-size:1.3rem;margin:1.5rem 0 0.75rem}
+.guide-section p,.guide-section li{color:var(--text-dim);font-size:0.9rem;line-height:1.65}
+.guide-section ul{padding-left:1.2rem;margin-bottom:1rem}
+.guide-section li{margin-bottom:0.4rem}
+
+footer{text-align:center;padding:2rem;border-top:1px solid var(--border);font-size:0.8rem;color:var(--text-dim);margin-top:2rem}
+
+@media(max-width:768px){.row{grid-template-columns:1fr}.tab{font-size:0.7rem;padding:0.55rem 0.3rem}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Product<span>Craft</span></div>
+  <nav>
+    <a href="#generator">Generator</a>
+    <a href="#guide">Selling Guide</a>
+  </nav>
+</header>
+
+<div class="container">
+
+<section class="hero">
+  <h1>Generate digital products.<br><em>Sell them on Etsy &amp; Gumroad.</em></h1>
+  <p>Fill in a form → download a finished product file → list it for $5–15 → collect payments while you sleep.</p>
+</section>
+
+<div id="generator">
+  <div class="tabs">
+    <button class="tab active" onclick="switchProduct('notion')">📓 Notion Templates</button>
+    <button class="tab" onclick="switchProduct('sheets')">📊 Google Sheets</button>
+    <button class="tab" onclick="switchProduct('resume')">📄 Resume Templates</button>
+    <button class="tab" onclick="switchProduct('planner')">📅 Planners</button>
+  </div>
+
+  <!-- NOTION -->
+  <div class="card product-panel" id="panel-notion">
+    <h2>Notion Template Generator</h2>
+    <p class="sub">Generates a step-by-step setup guide your customer follows to recreate the template in their Notion. Sell for $5-15 on Etsy/Gumroad.</p>
+    <div class="row">
+      <div class="field"><label>Template Name</label><input id="n-name" value="Ultimate Budget Tracker"></div>
+      <div class="field"><label>Category</label><select id="n-cat"><option>Personal Finance</option><option>Productivity</option><option>Health & Wellness</option><option>Project Management</option><option>Content Planning</option></select></div>
+    </div>
+    <div class="field"><label>Short Description (appears on Etsy listing)</label><input id="n-desc" value="Track income, expenses, and savings goals with this beautiful, easy-to-use Notion template. Automatic calculations, monthly overviews, and category breakdowns included."></div>
+    <div class="field"><label>Database/Layout Structure (list each section)</label><textarea id="n-structure" placeholder="1. Dashboard — monthly overview with budget vs actual
+2. Income Tracker — log all income sources with auto-categorization
+3. Expense Tracker — track spending with categories and tags
+4. Savings Goals — visual progress bars for each goal
+5. Monthly Reports — auto-generated spending breakdowns"></textarea></div>
+    <div class="field"><label>Target Audience Keywords (for Etsy SEO)</label><input id="n-keywords" value="notion budget template, personal finance notion, expense tracker template, savings planner notion, budget spreadsheet notion">
+    </div>
+    <div class="btn-row" style="display:flex;gap:0.75rem;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="generateNotion()">Generate Notion Template Guide</button>
+    </div>
+    <div class="preview-area" id="n-output"></div>
+  </div>
+
+  <!-- SHEETS -->
+  <div class="card product-panel" id="panel-sheets" style="display:none">
+    <h2>Google Sheets Template Generator</h2>
+    <p class="sub">Generates a CSV file + usage instructions your customer imports into Google Sheets. Sell for $3-10.</p>
+    <div class="row">
+      <div class="field"><label>Product Name</label><input id="s-name" value="Small Business Invoice & Expense Tracker"></div>
+      <div class="field"><label>Type</label><select id="s-type"><option>Invoice Generator</option><option>Expense Tracker</option><option>Budget Planner</option><option>Sales Dashboard</option><option>Inventory Tracker</option></select></div>
+    </div>
+    <div class="field"><label>Description</label><input id="s-desc" value="Professional invoice tracker with automatic tax calculations, client database, and monthly revenue summaries."></div>
+    <div class="field"><label>Column Names (comma-separated)</label><input id="s-columns" value="Date,Client,Description,Amount,Status,Payment Method,Due Date,Notes">
+    </div>
+    <button class="btn btn-primary" onclick="generateSheets()">Generate Sheets Template</button>
+    <div class="preview-area" id="s-output"></div>
+  </div>
+
+  <!-- RESUME -->
+  <div class="card product-panel" id="panel-resume" style="display:none">
+    <h2>Resume Template Generator</h2>
+    <p class="sub">Generates a clean, ATS-friendly resume template as an HTML file that exports perfectly to PDF. Sell for $3-10.</p>
+    <div class="row">
+      <div class="field"><label>Template Name</label><input id="r-name" value="Clean Professional Resume Template"></div>
+      <div class="field"><label>Style</label><select id="r-style"><option>Clean & Modern</option><option>Minimal Monochrome</option><option>Creative with Accent</option><option>Two-Column Corporate</option></select></div>
+    </div>
+    <div class="field"><label>Accent Color</label><input id="r-color" type="color" value="#2563eb" style="width:60px;height:36px;padding:2px">
+    </div>
+    <button class="btn btn-primary" onclick="generateResume()">Generate Resume Template</button>
+    <div class="preview-area rendered" id="r-output"></div>
+  </div>
+
+  <!-- PLANNER -->
+  <div class="card product-panel" id="panel-planner" style="display:none">
+    <h2>Planner & Journal Generator</h2>
+    <p class="sub">Generates a printable PDF planner (daily/weekly/monthly). Sell for $5-12.</p>
+    <div class="row">
+      <div class="field"><label>Planner Name</label><input id="p-name" value="2026 Ultimate Daily Planner"></div>
+      <div class="field"><label>Type</label><select id="p-type"><option>Daily Planner</option><option>Weekly Planner</option><option>Monthly Goals</option><option>Habit Tracker</option><option>Meal Planner</option></select></div>
+    </div>
+    <div class="field"><label>Color Theme</label><select id="p-theme"><option>Warm Terracotta</option><option>Ocean Blue</option><option>Forest Green</option><option>Minimal Black</option><option>Blush Pink</option></select></div>
+    <button class="btn btn-primary" onclick="generatePlanner()">Generate Planner</button>
+    <div class="preview-area rendered" id="p-output"></div>
+  </div>
+
+  <div style="text-align:center;margin-top:0.75rem">
+    <button class="btn btn-outline" onclick="document.querySelectorAll('.preview-area').forEach(e=>e.innerHTML='')">Clear All Outputs</button>
+  </div>
+</div>
+
+<div id="guide" class="guide-section" style="margin-top:3rem">
+  <div class="card">
+    <h2>📦 How to Sell on Etsy &amp; Gumroad</h2>
+    <p class="sub">You have the product. Here's how to get paid.</p>
+
+    <h3>Option 1: Etsy (Best for Volume)</h3>
+    <ol>
+      <li>Go to <strong>etsy.com/sell</strong> → create shop (free, 5 minutes)</li>
+      <li>Click "Add a listing" → upload your generated file as the digital download</li>
+      <li>Title: use the keywords from your product description. Example: "Notion Budget Template | Personal Finance Tracker | Expense Planner for Notion"</li>
+      <li>Price: $3-15. Start lower ($5) until you get 10+ sales and reviews, then raise.</li>
+      <li>Tags: use all 13 tag slots. Every tag = a search someone might type.</li>
+      <li>Photos: create 5 simple mockups using Canva (free). Show the template in use on a laptop/phone.</li>
+      <li><strong>Cost:</strong> Etsy charges $0.20 per listing + 6.5% transaction fee. No monthly fee.</li>
+    </ol>
+
+    <h3>Option 2: Gumroad (Simpler, Better Margins)</h3>
+    <ol>
+      <li>Go to <strong>gumroad.com</strong> → create account (free)</li>
+      <li>Products → New Product → upload your file</li>
+      <li>Set price. Gumroad charges 10% flat (no listing fee).</li>
+      <li>Copy your Gumroad link and share on Reddit, Twitter, Pinterest.</li>
+      <li><strong>Advantage:</strong> No listing fee. Better for testing which products sell before committing to Etsy.</li>
+    </ol>
+
+    <h3>🚀 Quick Wins to Get First Sales</h3>
+    <ul>
+      <li><strong>Reddit:</strong> Post in r/Notion, r/Productivity, r/personalfinance, r/resumes — share a screenshot, offer a discount code in comments</li>
+      <li><strong>Pinterest:</strong> Create 5 pins per product. Pinterest is Etsy's #1 traffic source for digital products.</li>
+      <li><strong>Bundle:</strong> After creating 3-5 products, bundle them at $19.95 (perceived as great value)</li>
+      <li><strong>Seasonality:</strong> Budget templates sell in January. Planners sell in December. Resume templates sell year-round but spike in spring.</li>
+    </ul>
+
+    <h3>💰 Realistic Numbers</h3>
+    <p>Most digital product sellers on Etsy earn <strong>$100-500/month</strong> with 10-20 listings. Top sellers with 50+ optimized listings earn $1,000-5,000/month. The key: <strong>more listings = more search visibility.</strong> Use this generator to create 10+ products in an afternoon.</p>
+  </div>
+</div>
+
+</div>
+
+<div class="toast" id="toast">✅ Downloaded!</div>
+<footer><p>ProductCraft — Generate. List. Earn. Repeat.</p></footer>
+
+<script>
+function switchProduct(type) {
+  document.querySelectorAll('.product-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-'+type).style.display = 'block';
+  event.target.classList.add('active');
+}
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+function getVal(id) { return document.getElementById(id).value.trim(); }
+function download(filename, content, type) {
+  const blob = new Blob([content], { type: type || 'text/plain' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = filename; a.click(); URL.revokeObjectURL(a.href);
+  showToast('✅ Downloaded: '+filename);
+}
+
+// ============ NOTION ============
+function generateNotion() {
+  const name = getVal('n-name') || 'Notion Template';
+  const cat = getVal('n-cat'); const desc = getVal('n-desc');
+  const structure = getVal('n-structure'); const keywords = getVal('n-keywords');
+  if (!structure) { document.getElementById('n-output').textContent = 'Please fill in the layout structure.'; return; }
+
+  const sections = structure.split('\n').filter(l=>l.trim());
+  const guide = `# ${name} — Notion Template Setup Guide
+
+## What You Bought
+${desc}
+
+## How to Set Up in Notion (5-10 minutes)
+
+Follow these steps to recreate this template in your Notion workspace:
+
+${sections.map((s,i) => {
+  const parts = s.replace(/^\d+[\.\)]\s*/,'').split('—');
+  return `### Step ${i+1}: ${parts[0].trim()}\n${parts[1] ? parts[1].trim() : 'Create this section in your Notion page.'}\n\n1. Open Notion and create a new page\n2. Add the elements described above\n3. Configure properties and views as shown`;
+}).join('\n\n')}
+
+## Tips for Best Results
+- Use the "Duplicate" feature to create new entries quickly
+- Star this page for quick access from your sidebar
+- Customize colors to match your brand or preference
+
+## Need Help?
+Reply to your Etsy/Gumroad purchase message and I'll help within 24 hours.
+
+---
+Generated by ProductCraft — ${new Date().toISOString().split('T')[0]}
+`;
+
+  document.getElementById('n-output').textContent = guide;
+  download(name.replace(/\s+/g,'-').toLowerCase()+'-guide.txt', guide);
+  document.getElementById('n-output').style.whiteSpace = 'pre-wrap';
+}
+
+// ============ SHEETS ============
+function generateSheets() {
+  const name = getVal('s-name') || 'Sheets Template';
+  const type = getVal('s-type'); const desc = getVal('s-desc'); const cols = getVal('s-columns');
+  if (!cols) { document.getElementById('s-output').textContent = 'Please enter column names.'; return; }
+
+  const columns = cols.split(',').map(c => c.trim());
+  const csv = columns.join(',') + '\n' + Array(3).fill(columns.map(() => '"Example"').join(',')).join('\n');
+  const instructions = `# ${name} — Google Sheets Template\n\n## Description\n${desc}\n\n## How to Import\n1. Open Google Sheets → File → Import → Upload this CSV\n2. The template will auto-populate with sample data\n3. Replace sample data with your own\n4. The formulas will auto-calculate\n\n## Template Type\n${type}\n\n## Columns\n${columns.map((c,i) => `${i+1}. ${c}`).join('\n')}\n`;
+
+  document.getElementById('s-output').textContent = 'CSV Preview:\n' + csv + '\n\n---\n' + instructions;
+  download(name.replace(/\s+/g,'-').toLowerCase()+'-template.csv', csv, 'text/csv');
+}
+
+// ============ RESUME ============
+function generateResume() {
+  const name = getVal('r-name') || 'Resume Template';
+  const style = getVal('r-style'); const color = getVal('r-color');
+
+  const styles = {
+    'Clean & Modern': { bg:'#fff', hdr:'#f8fafc', accent:color, layout:'single' },
+    'Minimal Monochrome': { bg:'#fff', hdr:'#fff', accent:'#111', layout:'single' },
+    'Creative with Accent': { bg:'#fff', hdr:color, accent:'#fff', layout:'single' },
+    'Two-Column Corporate': { bg:'#fff', hdr:color, accent:'#fff', layout:'two' },
+  };
+  const s = styles[style];
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${name}</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Arial,sans-serif;background:#e5e5e5;display:flex;justify-content:center;padding:2rem}
+.page{width:210mm;min-height:297mm;background:${s.bg};padding:25mm 20mm;box-shadow:0 0 20px rgba(0,0,0,.08)}
+.header{background:${s.hdr};padding:1.5rem;margin:-25mm -20mm 1.5rem -20mm}
+.header h1{font-size:2rem;color:${s.accent};margin-bottom:0.25rem}
+.header .contact{font-size:0.8rem;color:${s.accent === '#fff' ? 'rgba(255,255,255,.8)' : '#666'}}
+h2{font-size:1rem;color:${color};border-bottom:2px solid ${color};padding-bottom:0.2rem;margin:1.2rem 0 0.5rem;text-transform:uppercase;letter-spacing:.05em}
+.section{margin-bottom:0.8rem}
+.job-title{font-weight:700;font-size:0.95rem}
+.job-meta{font-size:0.8rem;color:#666;margin-bottom:0.2rem}
+ul{padding-left:1.2rem;font-size:0.85rem;line-height:1.5}
+li{margin-bottom:0.15rem}
+.skills{display:flex;flex-wrap:wrap;gap:0.4rem}
+.skill{background:#f0f0f0;padding:0.2rem 0.6rem;border-radius:4px;font-size:0.78rem}
+@media print{body{background:#fff;padding:0}.page{box-shadow:none}}
+</style></head><body><div class="page"><div class="header">
+<h1 contenteditable="true">Your Name</h1>
+<p class="contact" contenteditable="true">email@example.com | (555) 123-4567 | linkedin.com/in/yourname</p>
+</div>
+<h2>Professional Summary</h2>
+<div class="section" contenteditable="true"><p style="font-size:0.85rem;line-height:1.5">Results-driven professional with [X] years of experience in [industry/field]. Proven track record of [key achievement]. Seeking to leverage expertise in [skill area] to drive impact at [target company/role type].</p></div>
+<h2>Experience</h2>
+<div class="section"><p class="job-title" contenteditable="true">Senior [Role], [Company Name]</p><p class="job-meta" contenteditable="true">Jan 2022 – Present</p><ul><li contenteditable="true">Led [project/initiative] resulting in [quantifiable outcome]</li><li contenteditable="true">Managed team of [X] to deliver [result]</li><li contenteditable="true">Improved [process/metric] by [X]% through [action taken]</li></ul></div>
+<div class="section"><p class="job-title" contenteditable="true">[Previous Role], [Company Name]</p><p class="job-meta" contenteditable="true">Jun 2019 – Dec 2021</p><ul><li contenteditable="true">Built [system/feature] used by [X] users</li><li contenteditable="true">Reduced [cost/time] by [X]%</li></ul></div>
+<h2>Education</h2>
+<div class="section" contenteditable="true"><p style="font-size:0.85rem"><strong>[Degree]</strong> — [University Name], [Year]</p></div>
+<h2>Skills</h2>
+<div class="skills" contenteditable="true"><span class="skill">Skill 1</span><span class="skill">Skill 2</span><span class="skill">Skill 3</span><span class="skill">Skill 4</span><span class="skill">Skill 5</span></div>
+</div></body></html>`;
+
+  document.getElementById('r-output').innerHTML = '<div style="border:1px solid #ccc;padding:0.5rem;background:#fff;max-height:400px;overflow:auto"><iframe srcdoc="'+html.replace(/"/g,'&quot;')+'" style="width:100%;height:380px;border:none"></iframe></div>';
+  download(name.replace(/\s+/g,'-').toLowerCase()+'-template.html', html, 'text/html');
+}
+
+// ============ PLANNER ============
+function generatePlanner() {
+  const name = getVal('p-name') || 'Planner';
+  const type = getVal('p-type'); const theme = getVal('p-theme');
+  const themes = {
+    'Warm Terracotta': {bg:'#fefaf6',accent:'#e05a2c',text:'#1a1712',surface:'#fdf0ea'},
+    'Ocean Blue': {bg:'#f8fafc',accent:'#2563eb',text:'#1e293b',surface:'#eff6ff'},
+    'Forest Green': {bg:'#f9fbf8',accent:'#059669',text:'#1a2a1a',surface:'#ecfdf5'},
+    'Minimal Black': {bg:'#fafafa',accent:'#1a1a1a',text:'#1a1a1a',surface:'#f0f0f0'},
+    'Blush Pink': {bg:'#fef9fb',accent:'#db2777',text:'#2d1a24',surface:'#fdf2f8'},
+  };
+  const t = themes[theme];
+  let content = '';
+
+  if (type === 'Habit Tracker') {
+    const habits = ['Exercise','Read 30 min','Meditate','Drink Water','No Social Media','Sleep 8h','Journal','Stretch'];
+    content = habits.map((h,i) => `
+      <div style="display:flex;align-items:center;border-bottom:1px solid #e5e5e5;padding:0.5rem 0">
+        <span style="width:25px;height:25px;border:2px solid ${t.accent};border-radius:4px;margin-right:0.75rem;flex-shrink:0"></span>
+        <span style="font-size:0.9rem;flex:1">${h}</span>
+        ${[1,2,3,4,5,6,7].map(d => `<span style="width:28px;height:28px;border:1px solid #ddd;border-radius:50%;margin:0 2px;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:#999">${d}</span>`).join('')}
+      </div>`).join('');
+  } else {
+    const days = type === 'Daily Planner' ? ['Morning Routine','Top 3 Priorities','Schedule','Notes','Gratitude'] :
+                 type === 'Weekly Planner' ? ['Week of: ___','Goals This Week','Mon','Tue','Wed','Thu','Fri','Weekend','Notes'] :
+                 ['Month: ___','Big Goal','Week 1 Focus','Week 2 Focus','Week 3 Focus','Week 4 Focus','Habits','Reflection'];
+    content = days.map(d => `
+      <div style="margin-bottom:1rem">
+        <div style="font-weight:600;font-size:0.85rem;color:${t.accent};margin-bottom:0.3rem;text-transform:uppercase;letter-spacing:.06em">${d}</div>
+        <div style="border:1px dashed #ddd;border-radius:4px;min-height:${d.includes('Schedule')||d.includes('Notes')?'120px':'60px'};background:#fff;padding:0.5rem"></div>
+      </div>`).join('');
+  }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${name}</title><style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Helvetica Neue',Arial,sans-serif;background:${t.bg};color:${t.text};padding:2rem;display:flex;justify-content:center}
+.page{width:210mm;min-height:297mm;background:#fff;padding:20mm;box-shadow:0 0 10px rgba(0,0,0,.05)}
+h1{font-size:1.8rem;color:${t.accent};margin-bottom:0.2rem;text-align:center}
+.date{text-align:center;color:#999;font-size:0.85rem;margin-bottom:1.5rem}
+body{background:${t.bg}}
+@media print{body{background:#fff;padding:0}.page{box-shadow:none;page-break-after:always}}
+</style></head><body><div class="page">
+<h1>${name}</h1>
+<p class="date">Date: _______________</p>
+${content}
+</div></body></html>`;
+
+  document.getElementById('p-output').innerHTML = '<div style="border:1px solid #ccc;padding:0.5rem;background:#fff;max-height:400px;overflow:auto"><iframe srcdoc="'+html.replace(/"/g,'&quot;')+'" style="width:100%;height:380px;border:none"></iframe></div>';
+  download(name.replace(/\s+/g,'-').toLowerCase()+'-planner.html', html, 'text/html');
+}
+</script>
+
+</body>
+</html>
